@@ -5,7 +5,7 @@
 > *A civic-tech initiative transforming complex administrative data into an accessible, intuitive public utility.*
 
 ## 📌 The Problem
-The NYC Department of Transportation (DoT) maintains a massive dataset of parking regulations. However, this data is point-based—meaning it only shows the exact latitude and longitude of physical street signs. While useful for internal asset management, it fails to answer the primary question every driver has: **"Exactly where along this sidewalk can I park, and when?"**
+The NYC Department of Transportation (DoT) maintains a massive dataset of parking regulations. However, this data is point-based, meaning it only shows the exact latitude and longitude of physical street signs. While useful for internal asset management, it fails to answer the primary question every driver has: **"Exactly where along this sidewalk can I park, and when?"**
 
 ## 💡 The Solution
 This project bridges the gap between raw government data and public accessibility. By building an automated geospatial ETL pipeline, we ingest isolated sign coordinates and map them directly to continuous NYC curb-line geometries. The result is an interactive, color-coded map that instantly communicates parking legality to the user.
