@@ -32,4 +32,4 @@ We are continuously iterating on this project to build a highly robust tool. Upc
 * **Sanjar Melikov** - Frontend & Mapping Lead
 
 ---
-*Developed as an independent civic-tech project utilizing NYC OpenData.*
+*Developed as an independent project utilizing NYC OpenData.*
