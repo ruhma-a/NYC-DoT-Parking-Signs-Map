@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NYC DOT Parking Regulations Map</title>
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      font-family: Arial, sans-serif;
+    }
+
+    #map {
+      height: 100vh;
+      width: 100vw;
+    }
+
+    .info-legend {
+      background: white;
+      padding: 12px 16px;
+      line-height: 1.6;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      font-size: 13px;
+    }
+
+    .info-legend h4 {
+      margin: 0 0 8px;
+      font-size: 14px;
+    }
+
+    .legend-key {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      margin-right: 6px;
+      vertical-align: middle;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    const map = L.map('map').setView([40.7128, -74.0060], 13);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
+      maxZoom: 19
+    }).addTo(map);
+
+    function styleCurbLine(feature) {
+      const reg = (feature.properties && feature.properties.order_desc) ? feature.properties.order_desc.toUpperCase() : '';
+
+      let color = '#3388ff'; 
+
+      if (reg.includes('NO PARKING') || reg.includes('NO STANDING') || reg.includes('NO STOPPING')) {
+        color = '#d9534f';
+      } else if (reg.includes('METER') || reg.includes('LIMIT') || reg.includes('CLEANING')) {
+        color = '#f0ad4e';
+      } else if (reg.includes('PERMITTED') || reg.includes('UNRESTRICTED')) {
+        color = '#5cb85c';
+      }
+
+      return {
+        color: color,
+        weight: 5,
+        opacity: 0.855
+      };
+    }
+
+    fetch('continuous_parking_zones.geojson')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Could not load continuous_parking_zones.geojson');
+        }
+        return response.json();
+      })
+      .then(geojsonData => {
+        const parkingLayer = L.geoJSON(geojsonData, {
+          style: styleCurbLine,
+          onEachFeature: function (feature, layer) {
+            let popupContent = '<div>';
+            if (feature.properties) {
+              popupContent += `<strong>Segment ID:</strong> ${feature.properties.segment_id || 'N/A'}<br/>`;
+              if (feature.properties.order_desc) {
+                popupContent += `<strong>Regulation:</strong> ${feature.properties.order_desc}<br/>`;
+              }
+              if (feature.properties.distance_to_curb) {
+                popupContent += `<small>Distance to curb: ${parseFloat(feature.properties.distance_to_curb).toFixed(2)} ft</small>`;
+              }
+            } else {
+              popupContent += 'No regulation data available for this segment.';
+            }
+            popupContent += '</div>';
+
+            layer.bindPopup(popupContent);
+          }
+        }).addTo(map);
+
+        if (parkingLayer.getBounds().isValid()) {
+          map.fitBounds(parkingLayer.getBounds());
+        }
+      })
+      .catch(error => {
+        console.error('Error loading GeoJSON data:', error);
+      });
+
+    const legend = L.control({ position: 'bottomright' });
+    legend.onAdd = function () {
+      const div = L.DomUtil.create('div', 'info-legend');
+      div.innerHTML = `
+        <h4>Parking Regulations</h4>
+        <div><span class="legend-key" style="background: #5cb85c;"></span> Unrestricted / Open</div>
+        <div><span class="legend-key" style="background: #f0ad4e;"></span> Metered / Time-Restricted</div>
+        <div><span class="legend-key" style="background: #d9534f;"></span> No Parking / Standing / Stopping</div>
+      `;
+      return div;
+    };
+    legend.addTo(map);
+  </script>
+</body>
+</html>
