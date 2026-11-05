@@ -30,3 +30,10 @@ python map_curb_lines.py --signs <parking csv> --lion <lion.gdb>
 ## Not done yet
 - Parsing days and hours (for the time-of-day filter).
 - The map viewer.
+
+## Map data
+The full output is 163 MB, too big for GitHub or a browser, so `split_boroughs.py` writes one slim file per borough to `zones/` (about 111 MB in total, largest file 46 MB). `index.html` loads one borough at a time, starting with Manhattan, and colors each zone by `rule_class`.
+```
+python split_boroughs.py --zones continuous_parking_zones.geojson
+```
+Run `map_curb_lines.py` first, and rerun both when the signs CSV or LION is updated. Built from LION 26c and the 2026-10-30 signs CSV.
